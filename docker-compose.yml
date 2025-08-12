@@ -1,0 +1,40 @@
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    environment:
+      - CLUSTER_NAME=test
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+      - ./core-site.xml:/etc/hadoop/core-site.xml:ro
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    environment:
+      - CLUSTER_NAME=test
+    ports:
+      - "9864:9864"
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+      - ./core-site.xml:/etc/hadoop/core-site.xml:ro
+    depends_on:
+      - namenode
+
+  spark:
+    image: jupyter/pyspark-notebook
+    container_name: spark
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    depends_on:
+      - namenode
+      - datanode
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
